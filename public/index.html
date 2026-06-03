@@ -1,124 +1,410 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
 <meta charset="UTF-8">
-<title>Add Transaction</title>
-
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Transaction Portal</title>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@3.19.0/dist/tabler-icons.min.css">
 <style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 
-body{
-    font-family: Arial;
-    max-width:600px;
-    margin:40px auto;
-}
+  :root {
+    --blue-50:  #E6F1FB; --blue-100: #B5D4F4;
+    --blue-600: #185FA5; --blue-700: #0C447C;
+    --teal-600: #0F6E56; --teal-50:  #E1F5EE;
+    --red-50:   #FCEBEB; --red-600:  #A32D2D;
+    --red-text: #791F1F; --red-border:#F09595;
+    --ink:      #1a1a18; --muted:    #5F5E5A;
+    --hint:     #888780; --bg:       #ffffff;
+    --surface:  #F8F7F4; --border:   rgba(0,0,0,0.12);
+    --border-md:rgba(0,0,0,0.22); --radius:12px; --radius-sm:8px;
+  }
 
-label{
-    display:block;
-    margin-top:15px;
-}
+  body { font-family:-apple-system,'Segoe UI',Helvetica,Arial,sans-serif; background:#F4F2EF; min-height:100vh; color:var(--ink); }
 
-input,select{
-    width:100%;
-    padding:10px;
-}
+  .screen { display:none; }
 
-button{
-    margin-top:20px;
-    padding:10px 20px;
-}
+  /* LOGIN */
+  #loginScreen { min-height:100vh; align-items:center; justify-content:center; padding:2rem 1rem; }
+  #loginScreen.active { display:flex; }
+  .login-box { width:100%; max-width:380px; }
+  .brand { text-align:center; margin-bottom:2rem; }
+  .brand-icon { width:52px;height:52px;border-radius:14px;background:var(--blue-600);display:inline-flex;align-items:center;justify-content:center;margin-bottom:.875rem; }
+  .brand-icon i { color:#fff;font-size:26px; }
+  .brand h1 { font-size:22px;font-weight:600;color:var(--ink);margin-bottom:4px; }
+  .brand p  { font-size:13px;color:var(--muted); }
+  .card { background:var(--bg);border:0.5px solid var(--border);border-radius:var(--radius);padding:1.75rem 1.5rem; }
+  .field { margin-bottom:1.1rem; }
+  .field:last-child { margin-bottom:0; }
+  .field label { display:block;font-size:13px;font-weight:500;color:var(--muted);margin-bottom:6px; }
+  .field input,.field select { width:100%;padding:9px 12px;font-size:14px;border:0.5px solid var(--border-md);border-radius:var(--radius-sm);background:var(--bg);color:var(--ink);outline:none;transition:border-color .15s,box-shadow .15s;font-family:inherit; }
+  .field input:focus,.field select:focus { border-color:var(--blue-600);box-shadow:0 0 0 3px rgba(24,95,165,.12); }
+  .field input[readonly] { background:var(--surface);color:var(--muted);cursor:default; }
+  .btn-primary { width:100%;padding:11px;background:var(--blue-600);color:#fff;border:none;border-radius:var(--radius-sm);font-size:14px;font-weight:500;cursor:pointer;margin-top:.75rem;display:flex;align-items:center;justify-content:center;gap:8px;transition:background .15s;font-family:inherit; }
+  .btn-primary:hover { background:var(--blue-700); }
+  .btn-primary:disabled { opacity:.6;cursor:not-allowed; }
+  .error-msg { display:none;background:var(--red-50);color:var(--red-text);border:0.5px solid var(--red-border);border-radius:var(--radius-sm);padding:10px 12px;font-size:13px;margin-bottom:1rem;align-items:center;gap:8px; }
+  .error-msg.show { display:flex; }
 
-#msg{
-    margin-top:20px;
-    font-weight:bold;
-}
-
+  /* TXN SCREEN */
+  #txnScreen { min-height:100vh; padding:1.5rem 1rem 4rem; }
+  #txnScreen.active { display:block; }
+  .txn-inner { max-width:560px;margin:0 auto; }
+  .top-bar { display:flex;align-items:center;justify-content:space-between;margin-bottom:1.5rem; }
+  .top-left { display:flex;align-items:center;gap:12px; }
+  .avatar { width:40px;height:40px;border-radius:50%;background:var(--blue-50);display:flex;align-items:center;justify-content:center;font-size:13px;font-weight:600;color:var(--blue-700);border:0.5px solid var(--blue-100);flex-shrink:0; }
+  .top-name { font-size:15px;font-weight:600;color:var(--ink); }
+  .top-dept { font-size:12px;color:var(--muted);margin-top:1px; }
+  .logout-btn { font-size:13px;color:var(--muted);background:var(--bg);border:0.5px solid var(--border-md);border-radius:var(--radius-sm);padding:7px 13px;cursor:pointer;display:flex;align-items:center;gap:6px;transition:background .15s;font-family:inherit; }
+  .logout-btn:hover { background:var(--surface); }
+  .emp-badge { display:flex;align-items:center;gap:12px;background:var(--bg);border:0.5px solid var(--border);border-radius:var(--radius-sm);padding:11px 16px;margin-bottom:1.25rem; }
+  .emp-badge i { font-size:22px;color:var(--blue-600); }
+  .badge-name { font-size:14px;font-weight:600;color:var(--ink); }
+  .badge-meta { font-size:12px;color:var(--muted);margin-top:2px; }
+  .section-label { font-size:11px;font-weight:600;color:var(--hint);text-transform:uppercase;letter-spacing:.07em;margin:1.25rem 0 .75rem; }
+  .grid2 { display:grid;grid-template-columns:1fr 1fr;gap:12px; }
+  .cat-grid { display:grid;grid-template-columns:repeat(auto-fill,minmax(110px,1fr));gap:8px;margin-bottom:.5rem; }
+  .cat-btn { border:0.5px solid var(--border-md);border-radius:var(--radius-sm);padding:11px 8px;font-size:13px;cursor:pointer;background:var(--bg);color:var(--ink);display:flex;flex-direction:column;align-items:center;gap:6px;transition:all .15s;font-family:inherit; }
+  .cat-btn i { font-size:22px;color:var(--muted);transition:color .15s; }
+  .cat-btn:hover { background:var(--surface); }
+  .cat-btn.selected { background:var(--blue-50);border-color:var(--blue-600);color:var(--blue-700); }
+  .cat-btn.selected i { color:var(--blue-600); }
+  .cat-name { font-size:11px;text-align:center;line-height:1.3; }
+  .submit-row { display:flex;gap:10px;margin-top:1.5rem; }
+  .btn-submit { flex:1;padding:11px;background:var(--blue-600);color:#fff;border:none;border-radius:var(--radius-sm);font-size:14px;font-weight:500;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:8px;transition:background .15s;font-family:inherit; }
+  .btn-submit:hover { background:var(--blue-700); }
+  .btn-submit:disabled { opacity:.6;cursor:not-allowed; }
+  .btn-reset { padding:11px 16px;background:none;border:0.5px solid var(--border-md);border-radius:var(--radius-sm);font-size:14px;color:var(--muted);cursor:pointer;transition:background .15s;font-family:inherit;display:flex;align-items:center;gap:6px; }
+  .btn-reset:hover { background:var(--surface); }
+  .spinner { display:inline-block;width:14px;height:14px;border:2px solid rgba(255,255,255,.4);border-top-color:#fff;border-radius:50%;animation:spin .6s linear infinite; }
+  @keyframes spin { to { transform:rotate(360deg); } }
+  .toast { position:fixed;bottom:1.5rem;left:50%;transform:translateX(-50%) translateY(100px);background:var(--bg);border:0.5px solid var(--border);border-radius:var(--radius-sm);padding:11px 20px;font-size:14px;display:flex;align-items:center;gap:10px;transition:transform .3s ease;z-index:9999;min-width:280px;box-shadow:0 4px 20px rgba(0,0,0,0.08); }
+  .toast.show { transform:translateX(-50%) translateY(0); }
+  .toast.success i { color:var(--teal-600);font-size:18px; }
+  .toast.error   i { color:var(--red-600); font-size:18px; }
+  .skeleton { background:linear-gradient(90deg,var(--surface) 25%,#ede9e3 50%,var(--surface) 75%);background-size:200% 100%;animation:shimmer 1.2s infinite;border-radius:var(--radius-sm);height:80px; }
+  @keyframes shimmer { 0%{background-position:200% 0} 100%{background-position:-200% 0} }
 </style>
-
 </head>
 <body>
 
-<h2>Add Transaction</h2>
+<!-- LOGIN -->
+<div id="loginScreen" class="screen active">
+  <div class="login-box">
+    <div class="brand">
+      <div class="brand-icon"><i class="ti ti-building-bank"></i></div>
+      <h1>Transaction Portal</h1>
+      <p>Sign in with your employee credentials</p>
+    </div>
+    <div class="card">
+      <div class="error-msg" id="loginError">
+        <i class="ti ti-alert-circle"></i>
+        <span id="loginErrorText"></span>
+      </div>
+      <div class="field">
+        <label for="loginEmpId">Employee ID</label>
+        <input type="number" id="loginEmpId" placeholder="e.g. 101" min="1">
+      </div>
+      <div class="field">
+        <label for="loginPass">Password</label>
+        <input type="password" id="loginPass" placeholder="••••••••">
+      </div>
+      <button class="btn-primary" id="loginBtn" onclick="doLogin()">
+        <i class="ti ti-login"></i> Sign in
+      </button>
+    </div>
+  </div>
+</div>
 
-<form id="txnForm">
+<!-- TRANSACTION SCREEN -->
+<div id="txnScreen" class="screen">
+  <div class="txn-inner">
+    <div class="top-bar">
+      <div class="top-left">
+        <div class="avatar" id="avatarInitials">--</div>
+        <div>
+          <div class="top-name" id="topName">Employee</div>
+          <div class="top-dept" id="topDept">Department</div>
+        </div>
+      </div>
+      <button class="logout-btn" onclick="doLogout()">
+        <i class="ti ti-logout"></i> Sign out
+      </button>
+    </div>
 
-<label>Items</label>
-<input type="text" id="items" required>
+    <div class="emp-badge">
+      <i class="ti ti-id-badge-2"></i>
+      <div>
+        <div class="badge-name" id="badgeName">—</div>
+        <div class="badge-meta" id="badgeMeta">—</div>
+      </div>
+    </div>
 
-<label>Amount</label>
-<input type="number" id="amount" required>
+    <div class="card">
+      <div class="field">
+        <label for="txnItems">Items / Description</label>
+        <input type="text" id="txnItems" placeholder="e.g. Printer cartridges x4, A4 paper 5 reams">
+      </div>
+      <div class="grid2">
+        <div class="field">
+          <label for="txnAmount">Amount (₹)</label>
+          <input type="number" id="txnAmount" placeholder="0" min="1">
+        </div>
+        <div class="field">
+          <label>Available balance</label>
+          <input type="text" id="balanceDisplay" readonly placeholder="Select category →">
+        </div>
+      </div>
 
-<label>Employee ID</label>
-<input type="number" id="empid" required>
+      <div class="section-label">Category</div>
+      <div class="cat-grid" id="catGrid">
+        <!-- skeletons while loading -->
+        <div class="skeleton"></div>
+        <div class="skeleton"></div>
+        <div class="skeleton"></div>
+        <div class="skeleton"></div>
+      </div>
 
-<label>Category</label>
+      <div class="error-msg" id="txnError">
+        <i class="ti ti-alert-circle"></i>
+        <span id="txnErrorText"></span>
+      </div>
 
-<select id="category">
-    <option value="1">Fuel</option>
-    <option value="2">Infrastructure</option>
-    <option value="3">Staff Welfare</option>
-    <option value="4">Office Supplies</option>
-    <option value="5">Equipment</option>
-    <option value="6">Transport</option>
-    <option value="7">Medical</option>
-    <option value="8">Training</option>
-</select>
+      <div class="submit-row">
+        <button class="btn-submit" id="submitBtn" onclick="doSubmit()">
+          <i class="ti ti-circle-check"></i> Add Transaction
+        </button>
+        <button class="btn-reset" onclick="resetForm()" title="Reset">
+          <i class="ti ti-refresh"></i>
+        </button>
+      </div>
+    </div>
+  </div>
+</div>
 
-<button type="submit">
-Add Transaction
-</button>
-
-</form>
-
-<div id="msg"></div>
+<!-- Toast -->
+<div class="toast" id="toast">
+  <i id="toastIcon"></i>
+  <span id="toastMsg"></span>
+</div>
 
 <script>
+const CAT_ICONS = {
+  1:"ti-gas-station", 2:"ti-building", 3:"ti-heart",
+  4:"ti-clipboard",   5:"ti-tool",     6:"ti-truck",
+  7:"ti-first-aid-kit", 8:"ti-school"
+};
 
-document.getElementById("txnForm")
-.addEventListener("submit", async (e)=>{
+let currentEmployee = null;
+let categories      = [];
+let selectedCat     = null;
 
-    e.preventDefault();
+/* ─── Helpers ─── */
+function showScreen(id) {
+  document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+  document.getElementById(id).classList.add('active');
+}
+function setError(id, textId, msg) {
+  document.getElementById(textId).textContent = msg;
+  document.getElementById(id).classList.add('show');
+}
+function clearError(id) { document.getElementById(id).classList.remove('show'); }
+function showToast(msg, type) {
+  const t = document.getElementById('toast');
+  document.getElementById('toastMsg').textContent = msg;
+  document.getElementById('toastIcon').className = 'ti ' + (type === 'success' ? 'ti-circle-check' : 'ti-alert-circle');
+  t.className = 'toast ' + type;
+  t.classList.add('show');
+  setTimeout(() => t.classList.remove('show'), 3500);
+}
+function fmtINR(n) { return '₹' + Number(n).toLocaleString('en-IN'); }
+function setLoading(btnId, loading) {
+  const btn = document.getElementById(btnId);
+  if (loading) {
+    btn.disabled = true;
+    btn.innerHTML = '<span class="spinner"></span> Please wait…';
+  } else {
+    btn.disabled = false;
+    if (btnId === 'loginBtn')  btn.innerHTML = '<i class="ti ti-login"></i> Sign in';
+    if (btnId === 'submitBtn') btn.innerHTML = '<i class="ti ti-circle-check"></i> Add Transaction';
+  }
+}
 
-    const payload = {
-
-        items:
-            document.getElementById("items").value,
-
-        amount:
-            document.getElementById("amount").value,
-
-        empid:
-            document.getElementById("empid").value,
-
-        category:
-            document.getElementById("category").value
-    };
-
-    const response = await fetch(
-        "/addTransaction",
-        {
-            method:"POST",
-            headers:{
-                "Content-Type":"application/json"
-            },
-            body:JSON.stringify(payload)
-        }
-    );
-
-    const result = await response.json();
-
-    const msg = document.getElementById("msg");
-
-    if(result.success){
-        msg.innerHTML = "✅ " + result.message;
-        document.getElementById("txnForm").reset();
+/* ─── Check existing session on page load ─── */
+window.addEventListener('DOMContentLoaded', async () => {
+  try {
+    const res  = await fetch('/session');
+    const data = await res.json();
+    if (data.success && data.employee) {
+      currentEmployee = data.employee;
+      populateTxnScreen();
+      await loadCategories();
+      showScreen('txnScreen');
     }
-    else{
-        msg.innerHTML = "❌ " + result.message;
-    }
-
+  } catch (e) { /* no session, stay on login */ }
 });
 
-</script>
+/* ══════════════════════════════
+   LOGIN
+══════════════════════════════ */
+async function doLogin() {
+  const empid    = document.getElementById('loginEmpId').value.trim();
+  const password = document.getElementById('loginPass').value;
+  clearError('loginError');
 
+  if (!empid || !password) {
+    setError('loginError', 'loginErrorText', 'Please enter both Employee ID and password.');
+    return;
+  }
+
+  setLoading('loginBtn', true);
+  try {
+    const res  = await fetch('/login', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ empid: parseInt(empid), password })
+    });
+    const data = await res.json();
+
+    if (!data.success) {
+      setError('loginError', 'loginErrorText', data.message);
+      return;
+    }
+
+    currentEmployee = data.employee;
+    populateTxnScreen();
+    await loadCategories();
+    showScreen('txnScreen');
+
+  } catch (err) {
+    setError('loginError', 'loginErrorText', 'Could not reach server. Please try again.');
+  } finally {
+    setLoading('loginBtn', false);
+  }
+}
+
+/* ══════════════════════════════
+   POPULATE TXN SCREEN
+══════════════════════════════ */
+function populateTxnScreen() {
+  const emp     = currentEmployee;
+  const initials = emp.empName.split(' ').map(w => w[0]).join('').slice(0,2).toUpperCase();
+  document.getElementById('avatarInitials').textContent = initials;
+  document.getElementById('topName').textContent        = emp.empName;
+  document.getElementById('topDept').textContent        = emp.deptName;
+  document.getElementById('badgeName').textContent      = emp.empName;
+  document.getElementById('badgeMeta').textContent      = 'Emp ID: ' + emp.empid + '  ·  ' + emp.deptName;
+}
+
+async function loadCategories() {
+  try {
+    const res  = await fetch('/categories');
+    const data = await res.json();
+    if (!data.success) return;
+    categories = data.categories;
+
+    const grid = document.getElementById('catGrid');
+    grid.innerHTML = '';
+    categories.forEach(acc => {
+      const btn = document.createElement('button');
+      btn.type      = 'button';
+      btn.className = 'cat-btn';
+      btn.dataset.catId = acc.cat_id;
+      btn.innerHTML = `<i class="ti ${CAT_ICONS[acc.cat_id] || 'ti-folder'}"></i>
+                       <span class="cat-name">${acc.name}</span>`;
+      btn.addEventListener('click', () => selectCat(acc.cat_id, btn));
+      grid.appendChild(btn);
+    });
+  } catch (err) {
+    console.error('Failed to load categories', err);
+  }
+}
+
+function selectCat(catId, btn) {
+  document.querySelectorAll('.cat-btn').forEach(b => b.classList.remove('selected'));
+  btn.classList.add('selected');
+  selectedCat = catId;
+  const acc = categories.find(a => a.cat_id === catId);
+  document.getElementById('balanceDisplay').value = fmtINR(acc.balance);
+  clearError('txnError');
+}
+
+/* ══════════════════════════════
+   SUBMIT TRANSACTION
+══════════════════════════════ */
+async function doSubmit() {
+  const items  = document.getElementById('txnItems').value.trim();
+  const amount = parseInt(document.getElementById('txnAmount').value);
+  clearError('txnError');
+
+  if (!items) {
+    setError('txnError', 'txnErrorText', 'Please enter items / description.'); return;
+  }
+  if (!amount || amount <= 0) {
+    setError('txnError', 'txnErrorText', 'Please enter a valid amount greater than zero.'); return;
+  }
+  if (!selectedCat) {
+    setError('txnError', 'txnErrorText', 'Please select a category.'); return;
+  }
+
+  setLoading('submitBtn', true);
+  try {
+    const res  = await fetch('/addTransaction', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ items, amount, cat_id: selectedCat })
+      // empid is NOT sent — server reads it from session
+    });
+    const data = await res.json();
+
+    if (!data.success) {
+      setError('txnError', 'txnErrorText', data.message); return;
+    }
+
+    showToast(`Transaction #${data.tid} added — ${fmtINR(amount)}`, 'success');
+
+    // refresh balance on the selected category
+    const acc = categories.find(a => a.cat_id === selectedCat);
+    if (acc) acc.balance -= amount;
+
+    resetForm();
+
+  } catch (err) {
+    setError('txnError', 'txnErrorText', 'Server error. Please try again.');
+  } finally {
+    setLoading('submitBtn', false);
+  }
+}
+
+/* ══════════════════════════════
+   RESET / LOGOUT
+══════════════════════════════ */
+function resetForm() {
+  document.getElementById('txnItems').value  = '';
+  document.getElementById('txnAmount').value = '';
+  document.querySelectorAll('.cat-btn').forEach(b => b.classList.remove('selected'));
+  selectedCat = null;
+  document.getElementById('balanceDisplay').value = '';
+  clearError('txnError');
+}
+
+async function doLogout() {
+  try { await fetch('/logout', { method: 'POST' }); } catch (_) {}
+  currentEmployee = null;
+  categories      = [];
+  selectedCat     = null;
+  document.getElementById('loginEmpId').value = '';
+  document.getElementById('loginPass').value  = '';
+  clearError('loginError');
+  showScreen('loginScreen');
+}
+
+/* Enter key on login */
+document.addEventListener('keydown', e => {
+  if (e.key === 'Enter' && document.getElementById('loginScreen').classList.contains('active')) {
+    doLogin();
+  }
+});
+</script>
 </body>
 </html>
