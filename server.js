@@ -18,7 +18,7 @@ const pool = mysql.createPool({
     connectionLimit: 10
 });
 
-// Test Database Connection on Startup
+// Test DB Connection
 pool.getConnection()
     .then(conn => {
         console.log("✅ Database Connected Successfully");
@@ -37,8 +37,9 @@ app.post("/login", async (req, res) => {
             return res.json({ success: false, message: "Employee ID and Password are required" });
         }
 
+        // Changed table name from 'employees' to 'employee'
         const [rows] = await pool.query(
-            "SELECT empid FROM employees WHERE empid = ? AND password = ?",
+            "SELECT empid FROM employee WHERE empid = ? AND password = ?",
             [empid, password]
         );
 
