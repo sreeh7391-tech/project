@@ -33,31 +33,38 @@ app.post("/login", async (req, res) => {
     try {
         const { empid, password } = req.body;
 
-        if (!empid || !password) {
-            return res.json({ success: false, message: "Employee ID and Password are required" });
-        }
-
-        // Changed table name from 'employees' to 'employee'
         const [rows] = await pool.query(
-            "SELECT empid FROM employee WHERE empid = ? AND password = ?",
-            [empid, password]
+            "SELECT empid, password FROM employee WHERE empid = ?",
+            [empid]
         );
-	console.log(rows);
 
-        if (rows.length > 0) {
-            res.json({ success: true, message: "Login successful" });
-        } else {
-            res.json({ success: false, message: "Invalid Employee ID or Password" });
+        if (rows.length === 0) {
+            return res.json({
+                success: false,
+                message: "Employee ID not found"
+            });
         }
+
+        if (String(rows[0].password) === String(password)) {
+            return res.json({
+                success: true,
+                message: "Login successful"
+            });
+        }
+
+        return res.json({
+            success: false,
+            message: "Incorrect password"
+        });
+
     } catch (err) {
-        console.error("Login Error:", err);
-        res.status(500).json({ 
-            success: false, 
-            message: "Server error - " + err.message 
+        console.error(err);
+        res.status(500).json({
+            success: false,
+            message: err.message
         });
     }
 });
-
 // ====================== ADD TRANSACTION ======================
 app.post("/addTransaction", async (req, res) => {
     try {
