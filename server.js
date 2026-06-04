@@ -45,7 +45,7 @@ app.post("/login", async (req, res) => {
             });
         }
 
-        if (String(rows[0].password) === String(password)) {
+        if (String(rows[3].password) === String(password)) {
             return res.json({
                 success: true,
                 message: "Login successful"
