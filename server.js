@@ -1,28 +1,41 @@
 require("dotenv").config();
 const express = require("express");
 const mysql = require("mysql2/promise");
-const path = require("path");
 
 const app = express();
 
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
-app.use(express.static("public")); // Make sure your HTML is in public folder
+app.use(express.static("public"));
 
 const pool = mysql.createPool({
     host: process.env.DB_HOST,
     user: process.env.DB_USER,
     password: process.env.DB_PASSWORD,
     database: process.env.DB_NAME,
-    port: process.env.DB_PORT,
+    port: process.env.DB_PORT || 3306,
     waitForConnections: true,
     connectionLimit: 10
 });
+
+// Test Database Connection on Startup
+pool.getConnection()
+    .then(conn => {
+        console.log("✅ Database Connected Successfully");
+        conn.release();
+    })
+    .catch(err => {
+        console.error("❌ Database Connection Failed:", err.message);
+    });
 
 // ====================== LOGIN ENDPOINT ======================
 app.post("/login", async (req, res) => {
     try {
         const { empid, password } = req.body;
+
+        if (!empid || !password) {
+            return res.json({ success: false, message: "Employee ID and Password are required" });
+        }
 
         const [rows] = await pool.query(
             "SELECT empid FROM employees WHERE empid = ? AND password = ?",
@@ -35,8 +48,11 @@ app.post("/login", async (req, res) => {
             res.json({ success: false, message: "Invalid Employee ID or Password" });
         }
     } catch (err) {
-        console.error(err);
-        res.status(500).json({ success: false, message: "Server error" });
+        console.error("Login Error:", err);
+        res.status(500).json({ 
+            success: false, 
+            message: "Server error - " + err.message 
+        });
     }
 });
 
@@ -44,6 +60,11 @@ app.post("/login", async (req, res) => {
 app.post("/addTransaction", async (req, res) => {
     try {
         const { items, amount, empid, category } = req.body;
+
+        if (!items || !amount || !empid || !category) {
+            return res.json({ success: false, message: "All fields are required" });
+        }
+
         const cat_id = 400 + Number(category);
 
         const [result] = await pool.query(
@@ -51,28 +72,23 @@ app.post("/addTransaction", async (req, res) => {
             [items, amount, empid, cat_id]
         );
 
-        const counter = result[0][0].counter;
+        const counter = result[0][0]?.counter || 0;
 
         if (counter === 0) {
-            return res.json({
-                success: false,
-                message: "No Balance"
-            });
+            return res.json({ success: false, message: "No Balance" });
         }
 
-        res.json({
-            success: true,
-            message: "Transaction Added Successfully"
-        });
+        res.json({ success: true, message: "Transaction Added Successfully" });
     } catch (err) {
-        console.error(err);
-        res.status(500).json({
-            success: false,
-            message: err.message
+        console.error("Transaction Error:", err);
+        res.status(500).json({ 
+            success: false, 
+            message: "Server error - " + err.message 
         });
     }
 });
 
-app.listen(process.env.PORT || 3000, () => {
-    console.log("Server Started on port " + (process.env.PORT || 3000));
+const PORT = process.env.PORT || 3000;
+app.listen(PORT, () => {
+    console.log(`🚀 Server Started on http://localhost:${PORT}`);
 });
