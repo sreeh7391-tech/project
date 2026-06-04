@@ -2,72 +2,322 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Expense Management</title>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@latest/tabler-icons.min.css">
     <style>
+        *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
         body {
             font-family: Arial, sans-serif;
-            max-width: 600px;
-            margin: 40px auto;
-            padding: 20px;
+            background: #f4f5f7;
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 2rem 1rem;
+            color: #1a1a2e;
         }
+
+        .em-wrap {
+            width: 100%;
+            max-width: 460px;
+        }
+
+        .em-card {
+            background: #ffffff;
+            border: 1px solid #e4e4e8;
+            border-radius: 14px;
+            padding: 2rem 2rem 1.75rem;
+            box-shadow: 0 2px 12px rgba(0,0,0,0.06);
+        }
+
+        /* Logo / Brand */
+        .em-logo {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            margin-bottom: 1.5rem;
+        }
+        .em-logo-icon {
+            width: 38px;
+            height: 38px;
+            border-radius: 10px;
+            background: #EEEDFE;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        .em-logo-icon i { font-size: 20px; color: #534AB7; }
+        .em-logo-name { font-size: 15px; font-weight: 600; color: #1a1a2e; }
+        .em-logo-sub { font-size: 12px; color: #888; margin-top: 1px; }
+
+        .em-divider {
+            height: 1px;
+            background: #f0f0f3;
+            margin: 0 -2rem 1.75rem;
+        }
+
+        /* Headings */
+        .em-title { font-size: 18px; font-weight: 600; color: #1a1a2e; margin-bottom: 4px; }
+        .em-subtitle { font-size: 13px; color: #888; margin-bottom: 1.5rem; }
+
+        /* Badge */
+        .em-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            background: #EEEDFE;
+            color: #534AB7;
+            font-size: 12px;
+            font-weight: 500;
+            padding: 4px 12px;
+            border-radius: 99px;
+            margin-bottom: 1.25rem;
+        }
+        .em-badge i { font-size: 13px; }
+
+        /* Form fields */
+        .em-field { margin-bottom: 1rem; }
+
+        .em-label {
+            display: block;
+            font-size: 11px;
+            font-weight: 600;
+            color: #888;
+            text-transform: uppercase;
+            letter-spacing: 0.04em;
+            margin-bottom: 6px;
+        }
+
+        .em-input-wrap {
+            position: relative;
+            display: flex;
+            align-items: center;
+        }
+        .em-input-wrap i {
+            position: absolute;
+            left: 11px;
+            font-size: 16px;
+            color: #aaa;
+            pointer-events: none;
+        }
+
+        input, select {
+            width: 100%;
+            padding: 10px 12px 10px 36px;
+            font-size: 14px;
+            color: #1a1a2e;
+            background: #fafafa;
+            border: 1px solid #e4e4e8;
+            border-radius: 8px;
+            outline: none;
+            transition: border-color 0.15s, box-shadow 0.15s;
+            appearance: none;
+        }
+        input:focus, select:focus {
+            border-color: #534AB7;
+            box-shadow: 0 0 0 3px rgba(83,74,183,0.12);
+            background: #fff;
+        }
+        input::placeholder { color: #bbb; }
+
+        /* Primary button */
+        .em-btn {
+            width: 100%;
+            padding: 11px;
+            font-size: 14px;
+            font-weight: 600;
+            color: #fff;
+            background: #534AB7;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            margin-top: 0.5rem;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 7px;
+            transition: background 0.15s, transform 0.1s;
+        }
+        .em-btn:hover { background: #453DAA; }
+        .em-btn:active { transform: scale(0.98); }
+        .em-btn i { font-size: 16px; }
+
+        /* Messages */
+        .em-msg {
+            display: none;
+            margin-top: 1rem;
+            font-size: 13px;
+            padding: 10px 14px;
+            border-radius: 8px;
+        }
+        .em-msg.success {
+            background: #eaf3de;
+            color: #3B6D11;
+            border: 1px solid #c0dd97;
+        }
+        .em-msg.error {
+            background: #FCEBEB;
+            color: #A32D2D;
+            border: 1px solid #F7C1C1;
+        }
+
+        /* Footer row */
+        .em-footer {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-top: 1.5rem;
+            padding-top: 1rem;
+            border-top: 1px solid #f0f0f3;
+        }
+        .em-footer-text { font-size: 12px; color: #bbb; }
+
+        .em-logout {
+            font-size: 13px;
+            color: #666;
+            background: none;
+            border: 1px solid #e4e4e8;
+            border-radius: 8px;
+            padding: 6px 14px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            transition: background 0.15s;
+        }
+        .em-logout:hover { background: #f5f5f8; }
+        .em-logout i { font-size: 15px; }
+
+        /* Page visibility */
         .container { display: none; }
         .active { display: block; }
-        label { display: block; margin-top: 15px; }
-        input, select { width: 100%; padding: 10px; margin-top: 5px; }
-        button { margin-top: 20px; padding: 10px 20px; cursor: pointer; }
-        #msg, #loginMsg { margin-top: 20px; font-weight: bold; }
+
+        #msg, #loginMsg { margin-top: 1rem; font-weight: normal; }
     </style>
 </head>
 <body>
 
-    <!-- Login Form -->
+    <!-- Login Page -->
     <div id="loginPage" class="container active">
-        <h2>Employee Login</h2>
-        <form id="loginForm">
-            <label>Employee ID</label>
-            <input type="number" id="loginEmpId" required>
+        <div class="em-wrap">
+            <div class="em-card">
+                <div class="em-logo">
+                    <div class="em-logo-icon"><i class="ti ti-receipt-2"></i></div>
+                    <div>
+                        <div class="em-logo-name">ExpenseTrack</div>
+                        <div class="em-logo-sub">Employee portal</div>
+                    </div>
+                </div>
+                <div class="em-divider"></div>
 
-            <label>Password</label>
-            <input type="password" id="loginPassword" required>
+                <p class="em-title">Welcome back</p>
+                <p class="em-subtitle">Sign in with your employee credentials to continue.</p>
 
-            <button type="submit">Login</button>
-        </form>
-        <div id="loginMsg"></div>
+                <form id="loginForm">
+                    <div class="em-field">
+                        <label class="em-label" for="loginEmpId">Employee ID</label>
+                        <div class="em-input-wrap">
+                            <i class="ti ti-id-badge-2"></i>
+                            <input type="number" id="loginEmpId" placeholder="e.g. 10042" required>
+                        </div>
+                    </div>
+                    <div class="em-field">
+                        <label class="em-label" for="loginPassword">Password</label>
+                        <div class="em-input-wrap">
+                            <i class="ti ti-lock"></i>
+                            <input type="password" id="loginPassword" placeholder="Enter your password" required>
+                        </div>
+                    </div>
+                    <button class="em-btn" type="submit">
+                        <i class="ti ti-arrow-right"></i> Sign in
+                    </button>
+                </form>
+                <div class="em-msg" id="loginMsg"></div>
+            </div>
+        </div>
     </div>
 
-    <!-- Transaction Form -->
+    <!-- Transaction Page -->
     <div id="txnPage" class="container">
-        <h2>Add Transaction</h2>
-        <p><strong>Logged in as: Employee <span id="displayEmpId"></span></strong></p>
-        
-        <form id="txnForm">
-            <label>Items</label>
-            <input type="text" id="items" required>
+        <div class="em-wrap">
+            <div class="em-card">
+                <div class="em-logo">
+                    <div class="em-logo-icon"><i class="ti ti-receipt-2"></i></div>
+                    <div>
+                        <div class="em-logo-name">ExpenseTrack</div>
+                        <div class="em-logo-sub">Employee portal</div>
+                    </div>
+                </div>
+                <div class="em-divider"></div>
 
-            <label>Amount</label>
-            <input type="number" id="amount" required>
+                <div class="em-badge">
+                    <i class="ti ti-user-circle"></i>
+                    Employee <span id="displayEmpId"></span>
+                </div>
 
-            <label>Category</label>
-            <select id="category">
-                <option value="1">Fuel</option>
-                <option value="2">Infrastructure</option>
-                <option value="3">Staff Welfare</option>
-                <option value="4">Office Supplies</option>
-                <option value="5">Equipment</option>
-                <option value="6">Transport</option>
-                <option value="7">Medical</option>
-                <option value="8">Training</option>
-            </select>
+                <p class="em-title">New expense</p>
+                <p class="em-subtitle">Fill in the details below to log a transaction.</p>
 
-            <input type="hidden" id="empid"> <!-- Hidden field filled after login -->
+                <form id="txnForm">
+                    <div class="em-field">
+                        <label class="em-label" for="items">Items / Description</label>
+                        <div class="em-input-wrap">
+                            <i class="ti ti-file-description"></i>
+                            <input type="text" id="items" placeholder="e.g. Printer paper, toner" required>
+                        </div>
+                    </div>
+                    <div class="em-field">
+                        <label class="em-label" for="amount">Amount (₹)</label>
+                        <div class="em-input-wrap">
+                            <i class="ti ti-currency-rupee"></i>
+                            <input type="number" id="amount" placeholder="0.00" required>
+                        </div>
+                    </div>
+                    <div class="em-field">
+                        <label class="em-label" for="category">Category</label>
+                        <div class="em-input-wrap">
+                            <i class="ti ti-tag"></i>
+                            <select id="category">
+                                <option value="1">Fuel</option>
+                                <option value="2">Infrastructure</option>
+                                <option value="3">Staff Welfare</option>
+                                <option value="4">Office Supplies</option>
+                                <option value="5">Equipment</option>
+                                <option value="6">Transport</option>
+                                <option value="7">Medical</option>
+                                <option value="8">Training</option>
+                            </select>
+                        </div>
+                    </div>
 
-            <button type="submit">Add Transaction</button>
-        </form>
-        <div id="msg"></div>
-        <button onclick="logout()">Logout</button>
+                    <input type="hidden" id="empid">
+
+                    <button class="em-btn" type="submit">
+                        <i class="ti ti-plus"></i> Add Transaction
+                    </button>
+                </form>
+                <div class="em-msg" id="msg"></div>
+
+                <div class="em-footer">
+                    <span class="em-footer-text">Transactions are logged securely.</span>
+                    <button class="em-logout" onclick="logout()">
+                        <i class="ti ti-logout"></i> Sign out
+                    </button>
+                </div>
+            </div>
+        </div>
     </div>
 
 <script>
+// ==================== HELPERS ====================
+function showMsg(el, text, type) {
+    el.textContent = text;
+    el.className = 'em-msg ' + type;
+    el.style.display = 'block';
+}
+
 // ==================== LOGIN ====================
 document.getElementById("loginForm").addEventListener("submit", async (e) => {
     e.preventDefault();
@@ -85,14 +335,13 @@ document.getElementById("loginForm").addEventListener("submit", async (e) => {
     const msg = document.getElementById("loginMsg");
 
     if (result.success) {
-        // Store empid and switch to transaction page
         document.getElementById("empid").value = empid;
         document.getElementById("displayEmpId").textContent = empid;
-        
+
         document.getElementById("loginPage").classList.remove("active");
         document.getElementById("txnPage").classList.add("active");
     } else {
-        msg.innerHTML = "❌ " + result.message;
+        showMsg(msg, result.message, "error");
     }
 });
 
@@ -117,18 +366,19 @@ document.getElementById("txnForm").addEventListener("submit", async (e) => {
     const msg = document.getElementById("msg");
 
     if (result.success) {
-        msg.innerHTML = "✅ " + result.message;
+        showMsg(msg, result.message, "success");
         document.getElementById("txnForm").reset();
     } else {
-        msg.innerHTML = "❌ " + result.message;
+        showMsg(msg, result.message, "error");
     }
 });
 
+// ==================== LOGOUT ====================
 function logout() {
     document.getElementById("txnPage").classList.remove("active");
     document.getElementById("loginPage").classList.add("active");
     document.getElementById("loginForm").reset();
-    document.getElementById("loginMsg").innerHTML = "";
+    document.getElementById("loginMsg").style.display = "none";
 }
 </script>
 </body>
