@@ -30,6 +30,7 @@ pool.getConnection()
 
 // ====================== LOGIN ENDPOINT ======================
 // ====================== LOGIN ENDPOINT ======================
+
 app.post("/login", async (req, res) => {
     try {
         const { empid, password } = req.body;
@@ -111,5 +112,5 @@ app.post("/addTransaction", async (req, res) => {
 
 const PORT = process.env.PORT || 3000;
 app.listen(PORT, () => {
-    console.log(`🚀 Server Started on http://localhost:${PORT}`);
+    console.log(`🚀 Servers Started on http://localhost:${PORT}`);
 });
