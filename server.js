@@ -29,12 +29,20 @@ pool.getConnection()
     });
 
 // ====================== LOGIN ENDPOINT ======================
+// ====================== LOGIN ENDPOINT ======================
 app.post("/login", async (req, res) => {
     try {
         const { empid, password } = req.body;
 
+        if (!empid || !password) {
+            return res.json({
+                success: false,
+                message: "Employee ID and Password are required"
+            });
+        }
+
         const [rows] = await pool.query(
-            "SELECT empid, password FROM employee WHERE empid = ?",
+            "SELECT empid, password FROM employee WHERE empid = ? LIMIT 1",
             [empid]
         );
 
@@ -45,7 +53,10 @@ app.post("/login", async (req, res) => {
             });
         }
 
-        if (String(rows[3].password) === String(password)) {
+        if (
+            String(rows[0].password).trim() ===
+            String(password).trim()
+        ) {
             return res.json({
                 success: true,
                 message: "Login successful"
@@ -58,10 +69,11 @@ app.post("/login", async (req, res) => {
         });
 
     } catch (err) {
-        console.error(err);
-        res.status(500).json({
+        console.error("Login Error:", err);
+
+        return res.status(500).json({
             success: false,
-            message: err.message
+            message: "Server error"
         });
     }
 });
