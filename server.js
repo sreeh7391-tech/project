@@ -42,6 +42,7 @@ app.post("/login", async (req, res) => {
             "SELECT empid FROM employee WHERE empid = ? AND password = ?",
             [empid, password]
         );
+	console.log(rows);
 
         if (rows.length > 0) {
             res.json({ success: true, message: "Login successful" });
